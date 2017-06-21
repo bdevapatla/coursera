@@ -3,7 +3,6 @@ import edu.princeton.cs.algs4.StdStats;
 
 public class PercolationStats {
     
-    private Percolation percolation;
     private int trails;
     private double[] probability;
     private double sites;
@@ -23,15 +22,16 @@ public class PercolationStats {
         this.stdDevCalculated = false;
         int rowIndex, colIndex;         
         for (int i = 0; i < this.trails; i++) {          
-            this.percolation = new Percolation(n);          
-            while (!this.percolation.percolates()) {
+            Percolation percolation = new Percolation(n);          
+            while (!percolation.percolates()) {
                 rowIndex = StdRandom.uniform(1, n+1);
                 colIndex = StdRandom.uniform(1, n+1);        
-                if (!this.percolation.isOpen(rowIndex, colIndex)) {           
-                    this.percolation.open(rowIndex, colIndex);
+                if (!percolation.isOpen(rowIndex, colIndex)) {           
+                    percolation.open(rowIndex, colIndex);
                 }
             }           
-            this.probability[i] = this.percolation.numberOfOpenSites()/this.sites;          
+            this.probability[i] = percolation.numberOfOpenSites()/this.sites;
+            percolation = null;
         }       
     }
     

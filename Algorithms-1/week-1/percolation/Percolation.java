@@ -13,11 +13,8 @@ public class Percolation {
         wquf = new WeightedQuickUnionUF(this.n*this.n+2);       
     }
 
-    private void validate(int row, int col) {
-        if (row <= 0 || col <= 0) {
-            throw new java.lang.IllegalArgumentException("row and col indices should be greater than zero");
-        }       
-        if (row > this.n || col > this.n) {
+    private void validate(int row, int col) {               
+        if (row <= 0 || col <= 0 || row > this.n || col > this.n) {
             throw new java.lang.IndexOutOfBoundsException("row and col indices cannot be greater than :" +this.n);
         }       
     }
