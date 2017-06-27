@@ -35,7 +35,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     
     public void enqueue(Item item) {
         if (item == null) {
-            throw new java.lang.NullPointerException("Cannot add NULL item to queue");
+            throw new java.lang.IllegalArgumentException("Cannot add NULL item to queue");
         }
         if (last == q.length) {
             resize(n*2);
@@ -118,8 +118,5 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         public void remove() {
             throw new java.lang.UnsupportedOperationException(); 
         }        
-    }
-    
-    public static void main(String[] args) {                
     }
 }

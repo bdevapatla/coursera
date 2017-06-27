@@ -62,13 +62,20 @@ public class Deque<Item> implements Iterable<Item> {
     public Item removeFirst() {
         if (size == 0) {
             throw new java.util.NoSuchElementException("Empty dequeue");
-        }
+        }        
+        Item item = first.item;        
         size--;
-        Item item = first.item;
-        first = first.next;
-        if (first != null) {
-            first.previous = null;
+        if (size == 0) {
+            last = null;
+            first = null;
         }
+        else {
+            first = first.next;
+            if (first != null) {
+                first.previous = null;            
+            }
+        }
+        
         return item;
     }
     
@@ -114,11 +121,6 @@ public class Deque<Item> implements Iterable<Item> {
         
         public void remove() {
             throw new java.lang.UnsupportedOperationException("Remove method is not supported");
-        }
-        
-    }
-    
-
-    public static void main(String[] args) {                
+        }        
     }
 }
