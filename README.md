@@ -1,1 +1,1 @@
-bdevapatla's coursera assignments
+bdevapatla's coursera-algorithms assignments
