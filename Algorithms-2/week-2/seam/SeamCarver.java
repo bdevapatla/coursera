@@ -5,7 +5,7 @@ public class SeamCarver {
 
 	// private final Picture picture;
 	
-	private Color[][] color;
+	private int[][] color;
 	private int H, W;
 	
 
@@ -22,10 +22,10 @@ public class SeamCarver {
 	
 
 	private void createColorGrid(Picture picture) {
-		this.color = new Color[this.W][this.H];
+		this.color = new int[this.W][this.H];
 		for (int row = 0; row < this.H; row++) {
 			for (int col = 0; col < this.W; col++) {
-				this.color[col][row] = picture.get(col, row);
+				this.color[col][row] = picture.getRGB(col, row);
 			}
 		}
 	}
@@ -36,7 +36,7 @@ public class SeamCarver {
 		Picture picture = new Picture(this.W, this.H);
 		for (int row = 0; row < this.H; row++) {
 			for (int col = 0; col < this.W; col++) {
-				picture.set(col, row, this.color[col][row]);
+				picture.set(col, row, new Color(this.color[col][row]));
 			}
 		}
 		return picture;
@@ -75,15 +75,15 @@ public class SeamCarver {
 
 		// Calculate X-Square first
 
-		colorPlus1 = this.color[x + 1][y];
-		colorMinus1 = this.color[x - 1][y];
+		colorPlus1 = new Color(this.color[x + 1][y]);
+		colorMinus1 = new Color(this.color[x - 1][y]);
 
 		energyXSquare = (colorPlus1.getRed() - colorMinus1.getRed()) * (colorPlus1.getRed() - colorMinus1.getRed())
 				+ (colorPlus1.getGreen() - colorMinus1.getGreen()) * (colorPlus1.getGreen() - colorMinus1.getGreen())
 				+ (colorPlus1.getBlue() - colorMinus1.getBlue()) * (colorPlus1.getBlue() - colorMinus1.getBlue());
 
-		colorPlus1 = this.color[x][y + 1];
-		colorMinus1 = this.color[x][y - 1];
+		colorPlus1 = new Color(this.color[x][y + 1]);
+		colorMinus1 = new Color(this.color[x][y - 1]);
 
 		energyYSquare = (colorPlus1.getRed() - colorMinus1.getRed()) * (colorPlus1.getRed() - colorMinus1.getRed())
 				+ (colorPlus1.getGreen() - colorMinus1.getGreen()) * (colorPlus1.getGreen() - colorMinus1.getGreen())
@@ -225,7 +225,7 @@ public class SeamCarver {
 		}
 		
 		this.H--;
-		Color[][] temp = new Color[this.W][this.H];
+		int[][] temp = new int[this.W][this.H];
 
 		for (int row = 0; row < this.H; row++) {
 			for (int col = 0; col < this.W; col++) {
@@ -251,7 +251,7 @@ public class SeamCarver {
 		}
 		
 		this.W--;
-		Color[][] temp = new Color[this.W][this.H];
+		int[][] temp = new int[this.W][this.H];
 
 		for (int row = 0; row < this.H; row++) {
 			for (int col = 0; col < this.W; col++) {
