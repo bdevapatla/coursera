@@ -49,7 +49,7 @@ public class BaseballElimination {
 		if (team == null)
 			throw new java.lang.IllegalArgumentException("Invalid input");
 		int index = teams.indexOf(team);
-		if(index == -1) {
+		if (index == -1) {
 			throw new java.lang.IllegalArgumentException("Invalid input");
 		}
 		return wins[index];
@@ -60,7 +60,7 @@ public class BaseballElimination {
 		if (team == null)
 			throw new java.lang.IllegalArgumentException("Invalid input");
 		int index = teams.indexOf(team);
-		if(index == -1) {
+		if (index == -1) {
 			throw new java.lang.IllegalArgumentException("Invalid input");
 		}
 		return loss[index];
@@ -71,7 +71,7 @@ public class BaseballElimination {
 		if (team == null)
 			throw new java.lang.IllegalArgumentException("Invalid input");
 		int index = teams.indexOf(team);
-		if(index == -1) {
+		if (index == -1) {
 			throw new java.lang.IllegalArgumentException("Invalid input");
 		}
 		return left[index];
@@ -85,7 +85,7 @@ public class BaseballElimination {
 		int index1 = teams.indexOf(team1);
 		int index2 = teams.indexOf(team2);
 
-		if(index1 == -1 || index2 == -1) {
+		if (index1 == -1 || index2 == -1) {
 			throw new java.lang.IllegalArgumentException("Invalid input");
 		}
 		return g[index1][index2];
@@ -96,9 +96,9 @@ public class BaseballElimination {
 		int maxPossibleWins = wins[index] + left[index];
 		List<String> temp = null;
 		for (int i = 0; i < N; i++) {
-			if (i != index) {				
+			if (i != index) {
 				if (wins[i] > maxPossibleWins) {
-					if(temp == null ) {
+					if (temp == null) {
 						temp = new ArrayList<>();
 					}
 					temp.add(teams.get(i));
@@ -108,6 +108,20 @@ public class BaseballElimination {
 		}
 		return temp;
 	}
+	
+	/*private int getTeamIndices(int i, int j, int counter, int N, int index) {
+		int vertexI = counter+1, vertexJ = counter + 1;
+		
+		//index is getting removed
+		//g is between ith team jth team 
+		
+		//before i comes into picture there will be counter+1 definitely
+		//how many more will come in between depends on index
+		
+		return vertex;
+	}*/
+	
+	
 
 	private Iterable<String> isMathematicallyEliminated(String team) {
 		int index = teams.indexOf(team);
@@ -121,38 +135,51 @@ public class BaseballElimination {
 				}
 			}
 		}
-		FlowNetwork network = new FlowNetwork(counter + N + 1);
-		int c = 0;
+		int V = counter + N + 1;
+		FlowNetwork network = new FlowNetwork(V);
+		int c = 0, d = 0;
 		for (int i = 0; i < N; i++) {
 			for (int j = i + 1; j < N; j++) {
 				if (i == index || j == index) {
 					continue;
 				} else if (g[i][j] != 0) {
 					network.addEdge(new FlowEdge(0, c + 1, g[i][j]));
-					network.addEdge(new FlowEdge(c + 1, counter + 1 + i, Double.POSITIVE_INFINITY));
-					network.addEdge(new FlowEdge(c + 1, counter + 1 + j, Double.POSITIVE_INFINITY));
+
+					// Construct edges from games to teams
+
+					network.addEdge(new FlowEdge(c + 1, (i > index ? counter + i : counter + i + 1), 
+							Double.POSITIVE_INFINITY));
+					network.addEdge(new FlowEdge(c + 1, (j > index ? counter + j : counter + j + 1),
+							Double.POSITIVE_INFINITY));
 					c++;
 				}
 			}
+
 			if (i != index) {
-				network.addEdge(new FlowEdge(counter + 1 + i, network.V() - 1, wins[index] + left[index] - wins[i]));
+				network.addEdge(new FlowEdge(counter + 1 + d, network.V() - 1, wins[index] + left[index] - wins[i]));
+				d++;
 			}
+
 		}
 
-		FordFulkerson fulkerson = new FordFulkerson(network, 0, network.V() - 1);
-		// check if any team vertex is in the min-cut
-		List<String> temp = null;
+		/*for (FlowEdge edge : network.edges()) {
+			System.out.println(edge.from() + "-->" + edge.to() + " capacity: " + edge.capacity());
+		}*/
+
+		FordFulkerson fulkerson = new FordFulkerson(network, 0, network.V() - 1); 
+		List<String> temp = null;	
+		d=0;
 		for (int i = 0; i < N; i++) {
 			if (i != index) {
-				if (fulkerson.inCut(counter + 1 + i)) {
+				if (fulkerson.inCut(counter + 1 + d)) {
 					if (temp == null) {
 						temp = new ArrayList<>();
 					}
 					temp.add(teams.get(i));
 				}
+				d++;
 			}
 		}
-
 		return temp;
 	}
 
@@ -160,8 +187,11 @@ public class BaseballElimination {
 	public boolean isEliminated(String team) {
 		if (team == null)
 			throw new java.lang.IllegalArgumentException("Invalid input");
+		int index = teams.indexOf(team);
+		if (index == -1) {
+			throw new java.lang.IllegalArgumentException("Invalid input");
+		}
 		if (isTriviallyEliminated(team) != null) {
-			//StdOut.println(team + " is Trivially Eliminated");
 			return true;
 		} else if (isMathematicallyEliminated(team) != null) {
 			return true;
@@ -173,14 +203,17 @@ public class BaseballElimination {
 	public Iterable<String> certificateOfElimination(String team) {
 		if (team == null)
 			throw new java.lang.IllegalArgumentException("Invalid input");
-
+		int index = teams.indexOf(team);
+		if (index == -1) {
+			throw new java.lang.IllegalArgumentException("Invalid input");
+		}
 		Iterable<String> temp = isTriviallyEliminated(team);
 		if (temp == null) {
 			temp = isMathematicallyEliminated(team);
 		}
 		return temp;
 	}
-	
+
 	public static void main(String[] args) {
 	    BaseballElimination division = new BaseballElimination(args[0]);
 	    for (String team : division.teams()) {
@@ -196,17 +229,4 @@ public class BaseballElimination {
 	        }
 	    }
 	}
-
-	/*public static void main(String[] args) {
-		BaseballElimination division = new BaseballElimination("C:\\Princeton\\Assignment23\\src\\teams30.txt");
-		if (division.isEliminated("Team0")) {
-			//StdOut.print(team + " is eliminated by the subset R = { ");
-			for (String t : division.certificateOfElimination("Team0")) {
-				//StdOut.print(t + " ");
-			}
-			//StdOut.println("}");
-		} else {
-			//StdOut.println(team + " is not eliminated");
-		}
-	}*/
 }
