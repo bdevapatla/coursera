@@ -1,9 +1,6 @@
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import edu.princeton.cs.algs4.Bag;
 import edu.princeton.cs.algs4.In;
@@ -11,18 +8,21 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class BoggleSolver {
 
-	private final TreeSet<String> dictionary;
+	private final TrieDictionary dictionary;
 	private final int[] rules;
 	private Bag<Integer>[] adj;
-	private List<String> words;
+	private Set<String> words;
 	private int[][] index;
+	private char[] letter;
 	private int N;
+	private HashMap<String, Boolean> prefixNotMap;
 
 	public BoggleSolver(String[] dictionary) {
-		this.dictionary = new TreeSet<>();
-		this.dictionary.addAll(Arrays.asList(dictionary));
+		this.dictionary = new TrieDictionary();
+		for (int i = 0; i < dictionary.length; i++) {
+			this.dictionary.add(dictionary[i]);
+		}
 		this.rules = new int[] { 0, 0, 0, 1, 1, 2, 3, 5, 11 };
-		this.words = new ArrayList<>();
 	}
 
 	public Iterable<String> getAllValidWords(BoggleBoard board) {
@@ -39,110 +39,121 @@ public class BoggleSolver {
 			return 11;
 		}
 		return this.rules[length];
-
 	}
 
 	// Get a graph using adjacency list from board
-	@SuppressWarnings("unchecked")
-	private Set<String> createValidWords(BoggleBoard board) {
+	private void createValidWords(BoggleBoard board) {
+		this.words = new HashSet<>();
 		int n = board.rows();
 		int m = board.cols();
 		N = n * m;
-
-		Set<String> words = new HashSet<>();
 		adj = (Bag<Integer>[]) new Bag[N];
 		int counter = 0;
 		index = new int[n][m];
+		letter = new char[n * m];
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < m; j++) {
-				index[i][j] = counter++;
+				index[i][j] = counter;
+				letter[counter] = board.getLetter(i, j);
+				counter++;
+			}
+		}
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < m; j++) {
 				adj[index[i][j]] = createAdjacenyList(board, i, j, n, m);
 			}
 		}
+
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < m; j++) {
-				dfs(board, index[i][j], i, j, n, m);
+				dfs(board, index[i][j]);
 			}
 		}
-		return words;
-	}
 
-	private int getIndex(int i, int j, int n) {
-		return n * i + j;
-	}
-
-	private char getCharAtIndex(BoggleBoard board, int index, int n) {
-		int i = index / n;
-		int j = index % n;
-		return board.getLetter(i, j);
 	}
 
 	private Bag<Integer> createAdjacenyList(BoggleBoard board, int i, int j, int n, int m) {
 		Bag<Integer> bag = new Bag<>();
 		if (i - 1 >= 0) {
 			if (j - 1 >= 0) {
-				bag.add(getIndex(i - 1, j - 1, n));
+				bag.add(index[i - 1][j - 1]);
 			}
 			// j
-			bag.add(getIndex(i - 1, j, n));
+			bag.add(index[i - 1][j]);
 			if (j + 1 <= m - 1) {
-				bag.add(getIndex(i - 1, j + 1, n));
+				bag.add(index[i - 1][j + 1]);
 			}
 		}
 
 		if (i + 1 <= n - 1) {
 			if (j - 1 >= 0) {
-				bag.add(getIndex(i + 1, j - 1, n));
+				bag.add(index[i + 1][j - 1]);
 			}
 			// j
-			bag.add(getIndex(i + 1, j, n));
+			bag.add(index[i + 1][j]);
 			if (j + 1 <= m - 1) {
-				bag.add(getIndex(i + 1, j + 1, n));
+				bag.add(index[i + 1][j + 1]);
 			}
 		}
 
 		if (j - 1 >= 0) {
-			bag.add(getIndex(i, j - 1, n));
+			bag.add(index[i][j - 1]);
 		}
 
 		if (j + 1 <= m - 1) {
-			bag.add(getIndex(i, j + 1, n));
+			bag.add(index[i][j + 1]);
 		}
 
 		return bag;
 	}
 
-	private void dfs(BoggleBoard board, int idx, int i, int j, int n, int m) {
-		boolean[] localMarked = new boolean[n * m];		
+	private void dfs(BoggleBoard board, int idx) {
+		boolean[] localMarked = new boolean[N];
 		StringBuilder word = new StringBuilder();
-		char letter = getCharAtIndex(board, idx, n);
-		word.append(letter);
-		if (letter == 'Q') {
+		char c = letter[idx];
+		word.append(c);
+		if (c == 'Q') {
 			word.append('U');
-		}		
-		dfs(board, n, idx, localMarked, word);		
+		}
+		dfs(board, idx, localMarked, word);
 	}
 
-	private void dfs(BoggleBoard board, int n, int v, boolean[] localMarked, StringBuilder word) {
+	private void dfs(BoggleBoard board, int v, boolean[] localMarked, StringBuilder word) {
 		localMarked[v] = true;
+		
 		for (int w : adj[v]) {
 			if (!localMarked[w]) {
-				char letter = getCharAtIndex(board, w, n);
-				word.append(letter);
-				if (letter == 'Q') {
+				char c = letter[w];
+				word.append(c);
+				if (c == 'Q') {
 					word.append('U');
 				}
-				if (word.length() >= 3 && this.dictionary.contains(word.toString())
-						&& !this.words.contains(word.toString())) {
-					this.words.add(word.toString());
+
+
+				if (!this.dictionary.keysWithPrefix(word.toString())) {
+					
+					if (c == 'Q' && word.length() > 1) {
+						word.setLength(word.length() - 2);
+					} else if (word.length() > 0) {
+						word.setLength(word.length() - 1);
+					}
+					continue;
+					
 				}
-				dfs(board, n, w, localMarked, word);
+
+				
+				if (word.length() >= 3 && this.dictionary.contains(word.toString())
+						&& !words.contains(word.toString())) {
+					words.add(word.toString());
+				}
+				
+				dfs(board, w, localMarked, word);
 			}
 		}
-		//This is the most important section for graph traversal 
+		// This is the most important section for graph traversal
 		localMarked[v] = false;
-		char letter = getCharAtIndex(board, v, n);
-		if (letter == 'Q' && word.length() > 1) {
+		char c = letter[v];
+		if (c == 'Q' && word.length() > 1) {
 			word.setLength(word.length() - 2);
 		} else if (word.length() > 0) {
 			word.setLength(word.length() - 1);
@@ -150,22 +161,20 @@ public class BoggleSolver {
 	}
 
 	private boolean isValidWord(String word) {
-		return word.length() >= 3;		
+		return word.length() >= 3;
 	}
 
 	public static void main(String[] args) {
-		In in = new In("dictionary-algs4.txt");
+		In in = new In(args[0]);
 		String[] dictionary = in.readAllStrings();
 		BoggleSolver solver = new BoggleSolver(dictionary);
-		BoggleBoard board = new BoggleBoard("board-q.txt");
-
+		BoggleBoard board = new BoggleBoard(args[1]);
 		int score = 0;
 		for (String word : solver.getAllValidWords(board)) {
 			StdOut.println(word);
 			score += solver.scoreOf(word);
 		}
 		StdOut.println("Score = " + score);
-
 	}
 
 }
