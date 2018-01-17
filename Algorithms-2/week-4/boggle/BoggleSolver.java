@@ -14,8 +14,7 @@ public class BoggleSolver {
 	private Set<String> words;
 	private int[][] index;
 	private char[] letter;
-	private int N;
-	private HashMap<String, Boolean> prefixNotMap;
+	private int N;	
 
 	public BoggleSolver(String[] dictionary) {
 		this.dictionary = new TrieDictionary();
@@ -31,7 +30,7 @@ public class BoggleSolver {
 	}
 
 	public int scoreOf(String word) {
-		if (!isValidWord(word)) {
+		if (word.toString().length() < 3) {
 			return 0;
 		}
 		int length = word.length();
@@ -119,8 +118,7 @@ public class BoggleSolver {
 	}
 
 	private void dfs(BoggleBoard board, int v, boolean[] localMarked, StringBuilder word) {
-		localMarked[v] = true;
-		
+		localMarked[v] = true;		
 		for (int w : adj[v]) {
 			if (!localMarked[w]) {
 				char c = letter[w];
@@ -128,41 +126,36 @@ public class BoggleSolver {
 				if (c == 'Q') {
 					word.append('U');
 				}
+				String localWord = word.toString();
+				int localWordLength = localWord.length();
 
-
-				if (!this.dictionary.keysWithPrefix(word.toString())) {
-					
-					if (c == 'Q' && word.length() > 1) {
-						word.setLength(word.length() - 2);
-					} else if (word.length() > 0) {
-						word.setLength(word.length() - 1);
+				if (!this.dictionary.keysWithPrefix(localWord)) {					
+					if (c == 'Q' && localWordLength > 1) {
+						word.setLength(localWordLength - 2);
+					} else if (localWordLength > 0) {
+						word.setLength(localWordLength - 1);
 					}
-					continue;
-					
+					continue;					
 				}
-
 				
-				if (word.length() >= 3 && this.dictionary.contains(word.toString())
-						&& !words.contains(word.toString())) {
-					words.add(word.toString());
+				if (localWordLength >= 3 && this.dictionary.contains(localWord)) {
+					words.add(localWord);
 				}
 				
 				dfs(board, w, localMarked, word);
 			}
 		}
 		// This is the most important section for graph traversal
-		localMarked[v] = false;
+		localMarked[v] = false;		
+		int localWordLength = word.length();
 		char c = letter[v];
-		if (c == 'Q' && word.length() > 1) {
-			word.setLength(word.length() - 2);
-		} else if (word.length() > 0) {
-			word.setLength(word.length() - 1);
+		if (c == 'Q' && localWordLength > 1) {
+			word.setLength(localWordLength - 2);
+		} else if (localWordLength > 0) {
+			word.setLength(localWordLength - 1);
 		}
 	}
 
-	private boolean isValidWord(String word) {
-		return word.length() >= 3;
-	}
 
 	public static void main(String[] args) {
 		In in = new In(args[0]);

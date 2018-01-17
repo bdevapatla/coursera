@@ -78,8 +78,10 @@ public class TrieDictionary  {
 	private void collect(Node x, StringBuilder prefix, Set<String> results) {
 		if (x == null)
 			return;
-		if (x.isString)
+		if (x.isString){
 			results.add(prefix.toString());
+			return;
+		}
 		for (char c = 65; c < (R + 65); c++) {
 			prefix.append(c);
 			collect(x.next[c - 65], prefix, results);
