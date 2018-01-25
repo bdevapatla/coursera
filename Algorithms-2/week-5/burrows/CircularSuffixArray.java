@@ -21,8 +21,11 @@ public class CircularSuffixArray {
 			return this.input[i + d];
 		} else if (i + d == N) {
 			return this.input[0];
-		} else {
+		} else if(i+d-N < N) {
 			return this.input[i+d-N];
+		}
+		else {
+			return -1;
 		}
 	}
 	
